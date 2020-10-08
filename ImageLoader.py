@@ -1,12 +1,13 @@
+try:
+  import cv2
+  import os
+  import pickle
+  import numpy as np
+  #print("Library Loaded Successfully ..........")
+except Exception as e :
+  print("Could not load few libraries :",str(e))
 class ImageLoader(object):
-    try:
-      import cv2
-      import os
-      import pickle
-      import numpy as np
-      #print("Library Loaded Successfully ..........")
-    except Exception as e :
-      print("Could not load few libraries :",str(e))
+
       
     def log(self,msg):
       if(self.verbose==1):
@@ -23,11 +24,36 @@ class ImageLoader(object):
         self.x_data = []
         self.y_data = []
         self.CATEGORIES = []
-
 		# This will get List of categories
         self.list_categories = []
+    def __process_imagepath__(self,imgpath):
+      return cv2.imread(imgpath,cv2.IMREAD_GRAYSCALE)
+      
+    def __read_from_path__(self,imgfolderpath,category,read_max=None,read_start=1):
+      image_data=[]
+      image_label=[]
+      imgfolder=os.listdir(imgfolderpath)
+      i=0
+      for imgfile in imgfolder:
+          i+=1                                       
+          if(i<read_start):
+            continue                           
+          if(read_max!=None and i>read_max):
+            break   
+          imgpath = os.path.join(imgfolderpath, imgfile)  
+          try:        # if any image is corrupted
+              image=self.__process_imagepath__(imgpath)
+              image_data.append([image,])
+              image_label.append([category,])
+          except Exception as e:
+              #TODO add corrupt image handler custom function
+              self.log("error"+str(e))
+              pass
+      return np.asanyarray(image_data),np.asanyarray(image_label),i
 
-    def config_image(IMAGE_SIZE=80,FLATTERN=True,CUSTOM_PREPROCESS=function123):
+
+
+    def config_image(IMAGE_SIZE=80,FLATTERN=True,CUSTOM_PREPROCESS=None):
       pass
     def save(SAVE_PATH='current_folder',PREFIX="train",SAVE_BATCH_SIZE=False):
       pass 
